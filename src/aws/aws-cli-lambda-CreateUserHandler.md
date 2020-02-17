@@ -51,7 +51,7 @@ Create Policy
             "Action": [
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
-                "dynamodb:PutItem"
+                "dynamodb:UpdateItem"
             ],
             "Resource": [
                 "arn:aws:logs:us-west-2:645154635593:log-group:/aws/lambda/$FUNCTION_NAME:*",
@@ -124,19 +124,10 @@ aws lambda create-function \
     --zip-file fileb://./target/CreateUserLambda-1.0-SNAPSHOT.jar \
     --role $ROLE_ARN \
     --timeout 15 \
-    --memory-size 128
+    --memory-size 256
 ```
 
 # Updates
-
-**Code update**
-
-```
-mvn clean install
-aws lambda update-function-code \
-    --function-name CreateUserHandler \
-    --zip-file fileb://./target/CreateUserLambda-1.0-SNAPSHOT.jar
-```
 
 **Config update**
 
@@ -146,21 +137,14 @@ aws lambda update-function-configuration \
     --handler com.frj.auth.lambda.CreateUserInvokeHandler
 ```
 
+**Code update**
+
+```
+./lambda-deploy-current-workspace.sh
+```
+
 **Test Invoke**
 
 ```
-RESPONSE_JSON_FILE=/tmp/invoke_output.txt
-aws lambda invoke \
-    --function-name CreateUserHandler \
-    --cli-binary-format raw-in-base64-out \
-    --payload '{
-        "username": "fridge-guy",
-        "password": "fake-password-aspo8hgao8ehfa",
-        "userSpec": "SIMPLE/PIN"
-    }' \
-    $RESPONSE_JSON_FILE \
-&& echo -e "\nResponse paylod:" \
-&& cat $RESPONSE_JSON_FILE | jq \
-&& rm $RESPONSE_JSON_FILE \
-&& echo
+./lambda-invoke-test.sh myusername 012345
 ```
